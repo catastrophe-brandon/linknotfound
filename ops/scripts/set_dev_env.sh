@@ -13,7 +13,8 @@ req_pip=""
 # default answers
 default_dir="$(pwd)"
 default_dir_venv="$default_dir/venv"
-default_app="Code Seeker"
+default_app="link not found"
+app_name="linknotfound"
 
 welcome() {
   clear
@@ -84,10 +85,10 @@ venv() {
   print_header "Preparing python venv"
   mkdir -p $default_dir_venv
 
-  it_venv="$(find $default_dir -type d -name "seeker")"
+  it_venv="$(find $default_dir -type d -name "$app_name")"
 
   if [ -z "$it_venv" ]; then
-    print_check 1 "seeker not found at $default_dir_venv"
+    print_check 1 "$app_name not found at $default_dir_venv"
   fi
 
   {
@@ -105,7 +106,7 @@ venv() {
     $venv_name/bin/pip install -r requirements.txt >/dev/null 2>&1
     print_check 0 "installing pip requirements"
     $venv_name/bin/python3 -m pip install -e . >/dev/null 2>&1
-    print_check 0 "installing seeker as --editable"
+    print_check 0 "installing $app_name as --editable"
   } || {
     print_check 1 "venv installing $venv_name"
   }
