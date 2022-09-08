@@ -1,0 +1,11 @@
+[github]
+organization = "*********"
+token = "**********"
+
+[repos]
+contains = ["-ui", "-frontend"]
+
+[scan]
+path = "/var/tmp/linknotfound"
+exclude = [".git", ".travis"]
+regex = "*******"
