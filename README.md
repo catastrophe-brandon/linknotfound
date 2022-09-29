@@ -20,13 +20,40 @@ _automation using GitHub workflow, triggered by new PR event_
 
 ## Setup dev env
 
+run the script below to set developer env for this program in a consistent way:
+
 ```shell
-git clone git@github.com:eduardocerqueira/linknotfound.git
-cd linknotfound
 sh ops/scripts/set_dev_env.sh
 ```
 
+Or manually:
 
+```shell
+pip install --editable .[dev]
+```
+
+before running, **linknotfound/linknotfound.conf** create from
+sample [linknotfound/linknotfound.conf.sample](../linknotfound/linknotfound.conf.sample)
+
+```shell
+# checking installation
+linknotfound --test
+
+# running for real
+linknotfound
+
+# running in container
+sh ops/scripts/docker_build.sh
+sh ops/scripts/docker_run.sh
+```
+
+## contributing
+
+before commit any code, run lint as showing below:
+
+```shell
+pre-commit run --all
+```
 
 ## links
 * [GitPython](https://github.com/gitpython-developers/GitPython)
@@ -34,4 +61,4 @@ sh ops/scripts/set_dev_env.sh
 
 <br><br><br>
 [<img src="docs/img/pnf.jpg" width="250"/>](logo)<br>
-_Life is too short to be serious all the time! So, if you can't laugh at yourself, call me... I'll laugh at you._
+_Life is too short to be serious all the time! So, if you can't laugh at yourself, call me... I'll laugh with you._

@@ -1,5 +1,5 @@
 from datetime import datetime
-from util import HTTP_STATUS_BROKEN_LINK
+from linknotfound.util import HTTP_STATUS_BROKEN_LINK
 
 
 class RPDocLink:
