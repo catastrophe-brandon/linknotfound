@@ -1,7 +1,7 @@
 # linknotfound
 
-This project is a POC, [proof of concept](https://en.wikipedia.org/wiki/Proof_of_concept) for a simple tool to find and 
-report broken links from an application source code. 
+This project is a POC, [proof of concept](https://en.wikipedia.org/wiki/Proof_of_concept) for a simple tool to find and
+report broken links from an application source code.
 
 _This repository doesn't intend to be a final version of this poc, as well should not run in a production
 environment, as a public and open-source code you can use it with your own risks and contributions are welcome!._

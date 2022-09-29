@@ -9,3 +9,7 @@ contains = ["-ui", "-frontend"]
 path = "/var/tmp/linknotfound"
 exclude = [".git", ".travis"]
 regex = "*******"
+
+[report]
+name = "linknotfound"
+path = "/var/tmp/"

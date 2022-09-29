@@ -7,6 +7,9 @@ from os import remove, rename, listdir
 from subprocess import call, check_output
 from linknotfound import app_name
 
+HTTP_STATUS_BROKEN_LINK = [400, 403, 404]
+HTTP_STATUS_WORKING_LINK = [200, 202]
+
 
 def get_config(section, parameter):
     config = SafeConfigParser()
@@ -114,3 +117,15 @@ def obfuscate():
                     data = data.replace(k, v)
 
                 fp.write(data)
+
+
+def get_links_sum(links):
+    """
+    Find broken and working links from a list of links
+    HTTP STATUS CODE: https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
+    :param links: List of Repos
+    :return: integer broken_links and working_links
+    """
+    broken_links = sum(1 for i in links if i.status in HTTP_STATUS_BROKEN_LINK)
+    working_links = sum(1 for i in links if i.status in HTTP_STATUS_WORKING_LINK)
+    return broken_links, working_links
