@@ -14,26 +14,36 @@ _high-level overview with configuration, execution and reporting_
 ![diagram](docs/img/linknotfound-GH-workflow-automation.png)<br>
 _automation using GitHub workflow, triggered by new PR event_
 
+# Contributing and running the application
+
 ## Requirements
 * GitHub OauthAPI GITHUB_TOKEN
 * Python 3
 
-## Setup dev env
+## Development environment
 
-run the script below to set developer env for this program in a consistent way:
+From the path ./linknotfound run the script below to set developer environment for this program in a consistent way:
 
 ```shell
 sh ops/scripts/set_dev_env.sh
 ```
 
-Or manually:
+Or if you prefer to set it manually, from the path ./linknotfound run the command below:
 
 ```shell
 pip install --editable .[dev]
 ```
 
-before running, **linknotfound/linknotfound.conf** create from
-sample [linknotfound/linknotfound.conf.sample](../linknotfound/linknotfound.conf.sample)
+### configuration
+
+This program requires some configuration to be in the file **linknotfound/linknotfound.conf**. You
+can use the template file [linknotfound/linknotfound.conf.sample](../linknotfound/linknotfound.conf.sample) for
+creating your own file then update it with your credentials before running the program.
+
+### running
+
+If running the program from your local development environment, use the path ./linknotfound/linknotfound as the root
+before running the commands below. If running in container, you must be in the path ./linknotfound
 
 ```shell
 # checking installation
@@ -49,7 +59,8 @@ sh ops/scripts/docker_run.sh
 
 ## contributing
 
-before commit any code, run lint as showing below:
+Any PR is welcome and will pass through the code-review process. Be responsive with the code organization and run
+lint from the path ./linknotfound before your contributions:
 
 ```shell
 pre-commit run --all
