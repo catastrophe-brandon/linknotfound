@@ -45,16 +45,16 @@ class Report:
     def to_console(self):
         print(self.report_header)
         print(f"DATE: {self.report_date}")
-        print(f"DURATION: {self.duration}")
-        print(f"Organization: {self.org.name}")
-        print(f"Total Repos: {self.total_repos}")
-        print(f"Total Repos Filtered: {self.total_repos_filtered}")
+        print(f"SCAN DURATION: {self.duration}")
+        print(f"GH ORGANIZATION: {self.org.name}")
+        print(f"TOTAL REPOS: {self.total_repos}")
+        print(f"REPOS SCANNED: {self.total_repos_filtered}")
         for repo in self.org.repos:
             print(f"-" * 50)
-            print(f"REPO: {repo.name}")
-            print(f"URL: {repo.url}")
-            print(f"TOTAL FILES: {repo.total_files}")
-            print(f"TOTAL DOC LINK:{repo.total_links}")
+            print(f"REPO NAME: {repo.name}")
+            print(f"REPO URL: {repo.url}")
+            print(f"FILES IN REPO: {repo.total_files}")
+            print(f"FILES WITH DOC LINK:{repo.total_links}")
             print(f"TOTAL BROKEN LINK:{repo.total_broken_links}")
             count = 1
             for lk in repo.link:
@@ -68,17 +68,17 @@ class Report:
             f"{report_path}/{self.report_date}-{report_name}.txt", "w"
         ) as report_file:
             report_file.write(f"DATE: {self.report_date}")
-            report_file.write(f"\nDURATION: {self.duration}")
-            report_file.write(f"\nOrganization: {self.org.name}")
-            report_file.write(f"\nTotal Repos: {self.total_repos}")
-            report_file.write(f"\nTotal Repos Filtered: {self.total_repos_filtered}")
+            report_file.write(f"\nSCAN DURATION: {self.duration}")
+            report_file.write(f"\nGH ORGANIZATION: {self.org.name}")
+            report_file.write(f"\nTOTAL REPOS: {self.total_repos}")
+            report_file.write(f"\nREPOS SCANNED: {self.total_repos_filtered}")
             for repo in self.org.repos:
                 report_file.write(f"\n")
                 report_file.write(f"-" * 50)
-                report_file.write(f"\nREPO: {repo.name}")
-                report_file.write(f"\nURL: {repo.url}")
-                report_file.write(f"\nTOTAL FILES: {repo.total_files}")
-                report_file.write(f"\nTOTAL DOC LINK:{repo.total_links}")
+                report_file.write(f"\nREPO NAME: {repo.name}")
+                report_file.write(f"\nREPO URL: {repo.url}")
+                report_file.write(f"\nFILES IN REPO: {repo.total_files}")
+                report_file.write(f"\nFILES WITH DOC LINK:{repo.total_links}")
                 report_file.write(f"\nTOTAL BROKEN LINK:{repo.total_broken_links}")
                 count = 1
                 for lk in repo.link:

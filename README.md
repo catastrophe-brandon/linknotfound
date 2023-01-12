@@ -1,3 +1,9 @@
+[![CI](https://github.com/eduardocerqueira/linknotfound/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/eduardocerqueira/linknotfound/actions/workflows/ci.yml)
+[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)
+[![GitHub tag](https://img.shields.io/github/tag/eduardocerqueira/linknotfound.svg)](https://GitHub.com/eduardocerqueira/linknotfound/tags/)
+[![GitHub issues](https://img.shields.io/github/issues/eduardocerqueira/linknotfound.svg)](https://GitHub.com/eduardocerqueira/linknotfound/issues/)
+
+
 # linknotfound
 
 This project is a POC, [proof of concept](https://en.wikipedia.org/wiki/Proof_of_concept) for a simple tool to find and
