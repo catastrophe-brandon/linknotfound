@@ -38,6 +38,7 @@ class LnfCfg:
         LNF_GITHUB_TOKEN="**********"
 
     """
+
     LNF_GITHUB_ORGANIZATION = None
     LNF_GITHUB_TOKEN = None
     LNF_REPOS_CONTAINS = ["-ui", "-frontend"]
@@ -58,7 +59,9 @@ class LnfCfg:
             # linknotfound.conf GitHub
             _config_github = "github"
             _cfg.LNF_GITHUB_ORGANIZATION = get_config(_config_github, "organization")
-            _cfg.LNF_GITHUB_TOKEN = get_config(_config_github, "token") or getenv("GITHUB_TOKEN")
+            _cfg.LNF_GITHUB_TOKEN = get_config(_config_github, "token") or getenv(
+                "GITHUB_TOKEN"
+            )
 
             # linknotfound.conf repos
             _config_repos = "repos"
@@ -75,7 +78,7 @@ class LnfCfg:
             _cfg.LNF_REPORT_NAME = get_config(_config_report, "name")
             _cfg.LNF_REPORT_PATH = get_config(_config_report, "path")
 
-        for k in [a for a in dir(_cfg) if a.startswith('LNF_')]:
+        for k in [a for a in dir(_cfg) if a.startswith("LNF_")]:
             if k in os.environ:
                 logging.info(f"overriding configuration {k}")
                 setattr(_cfg, k, os.getenv(k))
@@ -159,7 +162,7 @@ class Runner:
             # repo files
             l_files = []
             for curr_path, currentDirectory, files in walk(
-                    f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
+                f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
             ):
                 for file in files:
                     file_abs = path.join(curr_path, file)
@@ -177,7 +180,9 @@ class Runner:
                 try:
                     with open(f_name, "r") as fp:
                         data = fp.read()
-                        matches = re.finditer(self.cfg.LNF_SCAN_REGEX, data, re.IGNORECASE)
+                        matches = re.finditer(
+                            self.cfg.LNF_SCAN_REGEX, data, re.IGNORECASE
+                        )
                         # doc url present in file
                         for match in matches:
                             rp_doc = RPDocLink()

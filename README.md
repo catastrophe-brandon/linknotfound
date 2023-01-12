@@ -36,13 +36,13 @@ pip install --editable .[dev]
 
 ### configuration
 
-This program requires some configuration before running it. You can use the template file 
-[linknotfound/linknotfound.conf.sample](../linknotfound/linknotfound.conf.sample) for creating 
+This program requires some configuration before running it. You can use the template file
+[linknotfound/linknotfound.conf.sample](../linknotfound/linknotfound.conf.sample) for creating
 **linknotfound/linknotfound.conf** then update it with your credentials, or you can set environment variables before
 running the program.
 
 Environment variables have high priority during the load, overriding the configurations from the file, if it exists.
-To set as environment variable, the variable name must start with LNF_ and following the section and the configuration 
+To set as environment variable, the variable name must start with LNF_ and following the section and the configuration
 key and value as example:
 
 in linknotfound.conf:
@@ -75,7 +75,7 @@ linknotfound --scan
 
 ### running in container
 
-Run the commands below to build and run linknotfound in container. 
+Run the commands below to build and run linknotfound in container.
 
 ```shell
 sh ops/scripts/docker_build.sh
@@ -96,7 +96,7 @@ docker run \
 -e LNF_GITHUB_ORGANIZATION="my-org" \
 -e LNF_GITHUB_TOKEN="******" \
 -e LNF_REPOS_CONTAINS="['-ui', '-frontend']" \
--e LNF_SCAN_REGEX="" \
+-e LNF_SCAN_REGEX="((http|https)\\:\/\/)?(doc\\.domain\\.com\\/docs)+([a-zA-Z0-9\\.\\&\\/\\?\\:@\\-_=#])*" \
 -e LINKNOTFOUND_RUN="--scan" -it linknotfound /bin/bash
 ```
 

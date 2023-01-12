@@ -23,7 +23,9 @@ def run():
         report_path=runner.cfg.LNF_REPORT_PATH, report_name=runner.cfg.LNF_REPORT_NAME
     )
     print("\n\n")
-    logging.info(f"scan completed! report saved at {runner.cfg.LNF_REPORT_PATH}/{runner.cfg.LNF_REPORT_NAME}")
+    logging.info(
+        f"scan completed! report saved at {runner.cfg.LNF_REPORT_PATH}/{runner.cfg.LNF_REPORT_NAME}"
+    )
     print("\n\n")
 
 
