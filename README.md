@@ -36,9 +36,29 @@ pip install --editable .[dev]
 
 ### configuration
 
-This program requires some configuration to be in the file **linknotfound/linknotfound.conf**. You
-can use the template file [linknotfound/linknotfound.conf.sample](../linknotfound/linknotfound.conf.sample) for
-creating your own file then update it with your credentials before running the program.
+This program requires some configuration before running it. You can use the template file 
+[linknotfound/linknotfound.conf.sample](../linknotfound/linknotfound.conf.sample) for creating 
+**linknotfound/linknotfound.conf** then update it with your credentials, or you can set environment variables before
+running the program.
+
+Environment variables have high priority during the load, overriding the configurations from the file, if it exists.
+To set as environment variable, the variable name must start with LNF_ and following the section and the configuration 
+key and value as example:
+
+in linknotfound.conf:
+
+```shell
+[github]
+organization = "*********"
+token = "**********"
+```
+
+as environment variables:
+
+```shell
+LNF_GITHUB_ORGANIZATION="*********"
+LNF_GITHUB_TOKEN="**********"
+```
 
 ### running
 
@@ -49,12 +69,35 @@ before running the commands below. If running in container, you must be in the p
 # checking installation
 linknotfound --test
 
-# running for real
-linknotfound
+# running the scanner
+linknotfound --scan
+```
 
-# running in container
+### running in container
+
+Run the commands below to build and run linknotfound in container. 
+
+```shell
 sh ops/scripts/docker_build.sh
 sh ops/scripts/docker_run.sh
+```
+
+You can pass arguments when running the script:
+
+```shell
+sh ops/scripts/docker_run.sh --test
+sh ops/scripts/docker_run.sh --scan
+```
+
+For running the scan you can pass all configuration by environment variables:
+
+```shell
+docker run \
+-e LNF_GITHUB_ORGANIZATION="my-org" \
+-e LNF_GITHUB_TOKEN="******" \
+-e LNF_REPOS_CONTAINS="['-ui', '-frontend']" \
+-e LNF_SCAN_REGEX="" \
+-e LINKNOTFOUND_RUN="--scan" -it linknotfound /bin/bash
 ```
 
 ## contributing

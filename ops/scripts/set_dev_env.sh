@@ -40,14 +40,6 @@ print_check() {
   esac
 }
 
-check_os() {
-  print_header "Check OS compatibility"
-  if [ ! -f "/etc/redhat-release" ]; then
-    print_check 1 "OS not compatible"
-  fi
-  print_check 0 "OS compatibility"
-}
-
 requirements() {
   print_header "Check requirements ( RPM packages and pip modules )"
   for pkg in "${req_rpm[@]}"; do
@@ -122,7 +114,6 @@ summary() {
 welcome
 question_install_path
 question_venv_dir
-check_os
 requirements
 start=$(date +'%s')
 venv

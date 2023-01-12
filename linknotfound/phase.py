@@ -21,7 +21,7 @@ class LnfCfg:
     Default configuration to run the program.
 
     Load the program configurations specified in linknotfound.conf file.
-    The configuration also can be declared by environment variable which when set, the environment variables
+    The configuration also can be declared by environment variables, when set the environment variables
     have high priority during the load, skipping loading the configurations from the file.
     To set as environment variable, the variable name must start
     with LNF_ and following the section and the configuration key and value as example:
