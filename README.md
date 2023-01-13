@@ -123,6 +123,11 @@ docker run \
 -e LINKNOTFOUND_RUN="scan" -it linknotfound /bin/bash
 ```
 
+running the web application in container, notice you can add extra env variables if needed:
+
+```shell
+docker run -e LINKNOTFOUND_RUN="web" -p 8000:8000 -it linknotfound /bin/bash
+```
 
 ## Web application
 

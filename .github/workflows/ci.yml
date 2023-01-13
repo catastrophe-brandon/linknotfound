@@ -36,7 +36,7 @@ jobs:
 
     - name: Run program
       run: |
-        linknotfound --test
+        linknotfound test
 
 
   code-analyze:
@@ -74,4 +74,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build --build-arg linknotfound_RUN="--test" -t linknotfound:$(date +%s) -f Dockerfile . --network host
+      run: docker build --build-arg linknotfound_RUN="test" -t linknotfound:$(date +%s) -f Dockerfile . --network host
