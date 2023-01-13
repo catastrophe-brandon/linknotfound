@@ -1,89 +1,17 @@
 import logging
-import os
 
 import re
 import sys
-from shutil import rmtree
-
 import requests
-from os import getenv, environ, path, mkdir, walk
-from linknotfound.util import get_config, get_links_sum
-from linknotfound import app_name
-from linknotfound.report import Report, RPRepo, RPDocLink
+from shutil import rmtree
+from os import environ, path, mkdir, walk
 from github import Github
 from git import Repo
+from linknotfound.util import get_links_sum, LnfCfg, APP_NAME
+from linknotfound.report import Report, RPRepo, RPDocLink
 
-logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
-
-
-class LnfCfg:
-    """
-    Default configuration to run the program.
-
-    Load the program configurations specified in linknotfound.conf file.
-    The configuration also can be declared by environment variables, when set the environment variables
-    have high priority during the load, skipping loading the configurations from the file.
-    To set as environment variable, the variable name must start
-    with LNF_ and following the section and the configuration key and value as example:
-
-        in linknotfound.conf:
-
-        [github]
-        organization = "*********"
-        token = "**********"
-
-        as environment variables:
-
-        LNF_GITHUB_ORGANIZATION="*********"
-        LNF_GITHUB_TOKEN="**********"
-
-    """
-
-    LNF_GITHUB_ORGANIZATION = None
-    LNF_GITHUB_TOKEN = None
-    LNF_REPOS_CONTAINS = ["-ui", "-frontend"]
-    LNF_SCAN_PATH = "/var/tmp/linknotfound"
-    LNF_SCAN_EXCLUDE = [".git", ".travis"]
-    LNF_SCAN_REGEX = None
-    LNF_REPORT_NAME = "linknotfound"
-    LNF_REPORT_PATH = "/var/tmp/"
-
-    @staticmethod
-    def load_configuration():
-        logging.info(f"loading configuration")
-        _cfg = LnfCfg()
-
-        if path.exists(f"{app_name}.conf"):
-            logging.info(f"loading configuration from file {app_name}.conf")
-
-            # linknotfound.conf GitHub
-            _config_github = "github"
-            _cfg.LNF_GITHUB_ORGANIZATION = get_config(_config_github, "organization")
-            _cfg.LNF_GITHUB_TOKEN = get_config(_config_github, "token") or getenv(
-                "GITHUB_TOKEN"
-            )
-
-            # linknotfound.conf repos
-            _config_repos = "repos"
-            _cfg.LNF_REPOS_CONTAINS = get_config(_config_repos, "contains")
-
-            # linknotfound.conf scan
-            _config_scan = "scan"
-            _cfg.LNF_SCAN_PATH = get_config(_config_scan, "path")
-            _cfg.LNF_SCAN_EXCLUDE = get_config(_config_scan, "exclude")
-            _cfg.LNF_SCAN_REGEX = get_config(_config_scan, "regex")
-
-            # linknotfound.conf report
-            _config_report = "report"
-            _cfg.LNF_REPORT_NAME = get_config(_config_report, "name")
-            _cfg.LNF_REPORT_PATH = get_config(_config_report, "path")
-
-        for k in [a for a in dir(_cfg) if a.startswith("LNF_")]:
-            if k in os.environ:
-                logging.info(f"overriding configuration {k}")
-                setattr(_cfg, k, os.getenv(k))
-
-        return _cfg
+logging.basicConfig(format='%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                    datefmt='%Y-%m-%d:%H:%M:%S', level=logging.INFO)
 
 
 class Runner:
@@ -92,7 +20,7 @@ class Runner:
     rp = None
 
     def runner_init(self):
-        self.cfg = LnfCfg().load_configuration()
+        self.cfg = LnfCfg()
         logging.info(f"CFG filtering repos: {self.cfg.LNF_REPOS_CONTAINS}")
         logging.info(f"CFG scan path: {self.cfg.LNF_SCAN_PATH}")
         logging.info(f"CFG report path: {self.cfg.LNF_REPORT_PATH}")
@@ -104,7 +32,7 @@ class Runner:
                 raise RuntimeError
         except RuntimeError:
             logging.error(
-                f"Missing github TOKEN, check GITHUB_TOKEN or LNF_GITHUB_TOKEN env var or token in {app_name}.conf"
+                f"Missing github TOKEN, check GITHUB_TOKEN or LNF_GITHUB_TOKEN env var or token in {APP_NAME}.conf"
             )
             sys.exit(1)
 
@@ -162,7 +90,7 @@ class Runner:
             # repo files
             l_files = []
             for curr_path, currentDirectory, files in walk(
-                f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
+                    f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
             ):
                 for file in files:
                     file_abs = path.join(curr_path, file)

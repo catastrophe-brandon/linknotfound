@@ -1,16 +1,31 @@
 import logging
 
 import click
-from linknotfound import app_name
-from linknotfound.phase import Runner
 import datetime
+from gevent.pywsgi import WSGIServer
+from linknotfound.phase import Runner
+from linknotfound.web import create_app
+from linknotfound.util import APP_NAME
 
-logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
+logging.basicConfig(format='%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                    datefmt='%Y-%m-%d:%H:%M:%S', level=logging.INFO)
 
 
-def run():
+@click.group()
+def cli():
+    pass
+
+
+@cli.command(help="test program execution")
+def test():
+    logging.info(f"{APP_NAME} is fine!")
+    exit(0)
+
+
+@cli.command(help="run scanner")
+def scan():
     start_time = datetime.datetime.now()
-    logging.info(f"{app_name} is running ...")
+    logging.info(f"{APP_NAME} is running ...")
     runner = Runner()
     runner.runner_init()
     repos = runner.get_org_repos()
@@ -20,24 +35,19 @@ def run():
     runner.rp.duration = end_time - start_time
     runner.rp.to_console()
     runner.rp.to_file(
-        report_path=runner.cfg.LNF_REPORT_PATH, report_name=runner.cfg.LNF_REPORT_NAME
-    )
+        report_path=runner.cfg.LNF_REPORT_PATH,
+        report_name=runner.cfg.LNF_REPORT_NAME)
     print("\n\n")
-    logging.info(
-        f"scan completed! report saved at {runner.cfg.LNF_REPORT_PATH}/{runner.cfg.LNF_REPORT_NAME}"
-    )
+    logging.info(f"scan completed report "
+                 f"saved at {runner.cfg.LNF_REPORT_PATH}/{runner.cfg.LNF_REPORT_NAME}")
     print("\n\n")
 
 
-@click.command()
-@click.option("--test", is_flag=True, help="testing app")
-@click.option("--scan", is_flag=True, help="run scanner")
-def cli(test, scan):
-    if test:
-        logging.info(f"{app_name} is fine!")
-        exit(0)
-    if scan:
-        run()
+@cli.command(help="run web application to list and access reports")
+def web():
+    web = create_app()
+    http_server = WSGIServer(("0.0.0.0", 8000), web)
+    http_server.serve_forever()
 
 
 if __name__ == "__main__":

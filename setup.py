@@ -25,6 +25,7 @@ setuptools.setup(
         "GitPython==3.1.27",
         "PyGithub==1.55",
         "click==8.1.3",
+        # TODO: add packages
     ],
     py_modules=["linknotfound"],
     entry_points={

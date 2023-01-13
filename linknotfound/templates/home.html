@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}Reports{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<ul>
+    {% for item in contents %}
+    <li>
+        <a href="/get/{{ item.key }}">{{ item.key }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

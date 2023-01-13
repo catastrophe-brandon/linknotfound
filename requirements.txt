@@ -2,3 +2,6 @@ click
 gitpython
 PyGithub
 requests
+boto3
+flask
+gevent
