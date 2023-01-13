@@ -17,17 +17,11 @@ environment, as a public and open-source code you can use it with your own risks
 
 ## diagrams
 
-![diagram_scanner](docs/img/diagram_scanner.png)<br>
-_high-level overview for the scanner client application_
-
-![diagram_web](docs/img/diagram_web.png)<br>
-_web application_
+![diagram](docs/img/diagram.png)<br>
+_high-level overview for the scanner client and web applications_
 
 ![diagram](docs/img/linknotfound-GH-workflow-automation.png)<br>
-_automation using GitHub workflow, triggered by new PR event_
-
-![diagram_scanner](docs/img/diagram.png)<br>
-_not implemented, future idea integrating with GH PR and workflow_
+_not implemented, future idea integrating with GH PR and workflow, triggered by new PR event_
 
 # Contributing and running the application
 

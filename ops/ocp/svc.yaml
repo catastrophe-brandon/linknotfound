@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app.openshift.io/vcs-ref: ""
+    app.openshift.io/vcs-uri: https://github.com/eduardocerqueira/linknotfound
+    openshift.io/generated-by: OpenShiftWebConsole
+  creationTimestamp: "2023-01-13T19:57:51Z"
+  labels:
+    app: linknotfound
+    app.kubernetes.io/component: linknotfound
+    app.kubernetes.io/instance: linknotfound
+    app.kubernetes.io/name: linknotfound
+    app.kubernetes.io/part-of: linknotfound
+  name: linknotfound
+  namespace: insights-qe-dev
+  resourceVersion: "3835600006"
+  uid: 26d31d2e-5c2b-4401-8eb8-6aac5989e84e
+spec:
+  clusterIP: 172.30.27.141
+  clusterIPs:
+  - 172.30.27.141
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: linknotfound
+    deploymentconfig: linknotfound
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

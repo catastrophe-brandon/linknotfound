@@ -1,0 +1,33 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: "2023-01-13T20:21:10Z"
+  labels:
+    app: linknotfound
+    app.kubernetes.io/component: linknotfound
+    app.kubernetes.io/instance: linknotfound
+    app.kubernetes.io/name: linknotfound
+    app.kubernetes.io/part-of: linknotfound
+  name: linknotfound
+  namespace: insights-qe-dev
+  resourceVersion: "3835606343"
+  uid: c118ae32-119c-41e8-b015-286599e1640d
+spec:
+  host: linknotfound.apps.ocp4.prod.psi.redhat.com
+  port:
+    targetPort: 8080-tcp
+  to:
+    kind: Service
+    name: linknotfound
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2023-01-13T20:21:10Z"
+      status: "True"
+      type: Admitted
+    host: linknotfound.apps.ocp4.prod.psi.redhat.com
+    routerCanonicalHostname: router-default.apps.ocp4.prod.psi.redhat.com
+    routerName: default
+    wildcardPolicy: None
