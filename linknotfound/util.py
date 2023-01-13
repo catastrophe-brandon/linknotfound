@@ -1,20 +1,136 @@
 import logging
 import json
-import os
 import re
 from configparser import SafeConfigParser
 from datetime import datetime, timedelta
-from os import remove, rename, listdir
+from os import remove, rename, listdir, path, getenv, environ
 from subprocess import call, check_output
-from linknotfound import app_name
 
+logging.basicConfig(
+    format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
+    datefmt="%Y-%m-%d:%H:%M:%S",
+    level=logging.INFO,
+)
+
+APP_NAME = "linknotfound"
 HTTP_STATUS_BROKEN_LINK = [400, 403, 404]
 HTTP_STATUS_WORKING_LINK = [200, 202]
 
 
-def get_config(section, parameter):
+class LnfCfg:
+    """
+    Default configuration to run the program.
+
+    Load the program configurations specified in linknotfound.conf file.
+    The configuration also can be declared by environment variables, when set the environment variables
+    have high priority during the load, skipping loading the configurations from the file.
+    To set as environment variable, the variable name must start
+    with LNF_ and following the section and the configuration key and value as example:
+
+        in linknotfound.conf:
+
+        [github]
+        organization = "*********"
+        token = "**********"
+
+        as environment variables:
+
+        LNF_GITHUB_ORGANIZATION="*********"
+        LNF_GITHUB_TOKEN="**********"
+
+    """
+
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(LnfCfg, cls).__new__(cls)
+            cls.instance.load_configuration()
+        return cls.instance
+
+    # DEFAULT values
+    # GitHub
+    LNF_GITHUB_ORGANIZATION = None
+    LNF_GITHUB_TOKEN = None
+    LNF_REPOS_CONTAINS = ["-ui", "-frontend"]
+    # Scanner
+    LNF_SCAN_PATH = "/var/tmp/linknotfound"
+    LNF_SCAN_EXCLUDE = [".git", ".travis"]
+    LNF_SCAN_REGEX = None
+    # Report
+    LNF_REPORT_NAME = "linknotfound"
+    LNF_REPORT_PATH = "/var/tmp/"
+    # AWS
+    LNF_S3_BUCKET = "report-linknotfound"
+    LNF_AWS_ACCESS_KEY_ID = None
+    LNF_AWS_SECRET_ACCESS_KEY = None
+
+    def load_configuration(self):
+        if path.exists(f"{APP_NAME}.conf"):
+            logging.info(f"loading configuration from file {APP_NAME}.conf")
+
+            # linknotfound.conf GitHub
+            _config_github = "github"
+            self.LNF_GITHUB_ORGANIZATION = get_config(
+                _config_github, "organization", self.LNF_GITHUB_ORGANIZATION
+            )
+            self.LNF_GITHUB_TOKEN = get_config(
+                _config_github, "token", self.LNF_GITHUB_TOKEN
+            ) or getenv("GITHUB_TOKEN")
+
+            # linknotfound.conf repos
+            _config_repos = "repos"
+            self.LNF_REPOS_CONTAINS = get_config(
+                _config_repos, "contains", self.LNF_REPOS_CONTAINS
+            )
+
+            # linknotfound.conf scan
+            _config_scan = "scan"
+            self.LNF_SCAN_PATH = get_config(_config_scan, "path", self.LNF_SCAN_PATH)
+            self.LNF_SCAN_EXCLUDE = get_config(
+                _config_scan, "exclude", self.LNF_SCAN_EXCLUDE
+            )
+            self.LNF_SCAN_REGEX = get_config(_config_scan, "regex", self.LNF_SCAN_REGEX)
+
+            # linknotfound.conf report
+            _config_report = "report"
+            self.LNF_REPORT_NAME = get_config(
+                _config_report, "name", self.LNF_REPORT_NAME
+            )
+            self.LNF_REPORT_PATH = get_config(
+                _config_report, "path", self.LNF_REPORT_PATH
+            )
+
+            # linknotfound.conf aws
+            _config_report = "aws"
+            self.LNF_S3_BUCKET = get_config(
+                _config_report, "bucket", self.LNF_S3_BUCKET
+            )
+            self.LNF_AWS_ACCESS_KEY_ID = get_config(
+                _config_report, "aws_access_key_id", self.LNF_AWS_ACCESS_KEY_ID
+            )
+            self.LNF_AWS_SECRET_ACCESS_KEY = get_config(
+                _config_report, "aws_secret_key_id", self.LNF_AWS_SECRET_ACCESS_KEY
+            )
+
+        for k in [a for a in dir(self.instance) if a.startswith("LNF_")]:
+            if k in environ:
+                logging.info(f"overriding configuration {k}")
+                setattr(self.instance, k, getenv(k))
+
+        return self.instance
+
+    @staticmethod
+    def get_cfg():
+        cfg = LnfCfg()
+        return cfg
+
+
+def get_config(section, parameter, default):
     config = SafeConfigParser()
-    config.read(f"{app_name}.conf")
+    config.read(f"{APP_NAME}.conf")
+
+    if section not in config:
+        return default
+
     return json.loads(config.get(section, parameter))
 
 

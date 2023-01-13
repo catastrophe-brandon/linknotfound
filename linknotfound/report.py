@@ -37,7 +37,7 @@ class RPOrg:
 class Report:
     """Report body"""
 
-    report_date = datetime.today().strftime("%Y-%m-%d")
+    report_date = datetime.today().strftime("%Y-%m-%d-%S")
     report_header = "-=-=-=" * 25
     duration = None
     org = RPOrg()
@@ -64,9 +64,7 @@ class Report:
                     count += 1
 
     def to_file(self, report_path, report_name):
-        with open(
-            f"{report_path}/{self.report_date}-{report_name}.txt", "w"
-        ) as report_file:
+        with open(f"{report_path}{report_name}", "w") as report_file:
             report_file.write(f"DATE: {self.report_date}")
             report_file.write(f"\nSCAN DURATION: {self.duration}")
             report_file.write(f"\nGH ORGANIZATION: {self.org.name}")

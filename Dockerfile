@@ -7,7 +7,7 @@ LABEL description="cli tool to find broken links in applications source code"
 ENV GITHUB_TOKEN=${GITHUB_TOKEN:-""}
 ENV GITHUB_USERNAME=${GITHUB_USERNAME:-"eduardocerqueira"}
 ENV GITHUB_EMAIL=${GITHUB_EMAIL:-"eduardomcerqueira@gmail.com"}
-ARG LINKNOTFOUND_RUN=${LINKNOTFOUND_RUN:-"--test"}
+ARG LINKNOTFOUND_RUN=${LINKNOTFOUND_RUN:-"test"}
 
 RUN env | grep -e LINKNOTFOUND_RUN -e GITHUB -e GITHUB_TOKEN
 

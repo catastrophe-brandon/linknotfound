@@ -1,98 +1,33 @@
 import logging
-import os
 
 import re
 import sys
-from shutil import rmtree
-
 import requests
-from os import getenv, environ, path, mkdir, walk
-from linknotfound.util import get_config, get_links_sum
-from linknotfound import app_name
-from linknotfound.report import Report, RPRepo, RPDocLink
+from shutil import rmtree
+from os import environ, path, mkdir, walk
 from github import Github
 from git import Repo
+from datetime import datetime
+from linknotfound.util import get_links_sum, LnfCfg, APP_NAME
+from linknotfound.report import Report, RPRepo, RPDocLink
+from linknotfound.storage import upload_file
 
-logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
-
-
-class LnfCfg:
-    """
-    Default configuration to run the program.
-
-    Load the program configurations specified in linknotfound.conf file.
-    The configuration also can be declared by environment variables, when set the environment variables
-    have high priority during the load, skipping loading the configurations from the file.
-    To set as environment variable, the variable name must start
-    with LNF_ and following the section and the configuration key and value as example:
-
-        in linknotfound.conf:
-
-        [github]
-        organization = "*********"
-        token = "**********"
-
-        as environment variables:
-
-        LNF_GITHUB_ORGANIZATION="*********"
-        LNF_GITHUB_TOKEN="**********"
-
-    """
-
-    LNF_GITHUB_ORGANIZATION = None
-    LNF_GITHUB_TOKEN = None
-    LNF_REPOS_CONTAINS = ["-ui", "-frontend"]
-    LNF_SCAN_PATH = "/var/tmp/linknotfound"
-    LNF_SCAN_EXCLUDE = [".git", ".travis"]
-    LNF_SCAN_REGEX = None
-    LNF_REPORT_NAME = "linknotfound"
-    LNF_REPORT_PATH = "/var/tmp/"
-
-    @staticmethod
-    def load_configuration():
-        logging.info(f"loading configuration")
-        _cfg = LnfCfg()
-
-        if path.exists(f"{app_name}.conf"):
-            logging.info(f"loading configuration from file {app_name}.conf")
-
-            # linknotfound.conf GitHub
-            _config_github = "github"
-            _cfg.LNF_GITHUB_ORGANIZATION = get_config(_config_github, "organization")
-            _cfg.LNF_GITHUB_TOKEN = get_config(_config_github, "token") or getenv(
-                "GITHUB_TOKEN"
-            )
-
-            # linknotfound.conf repos
-            _config_repos = "repos"
-            _cfg.LNF_REPOS_CONTAINS = get_config(_config_repos, "contains")
-
-            # linknotfound.conf scan
-            _config_scan = "scan"
-            _cfg.LNF_SCAN_PATH = get_config(_config_scan, "path")
-            _cfg.LNF_SCAN_EXCLUDE = get_config(_config_scan, "exclude")
-            _cfg.LNF_SCAN_REGEX = get_config(_config_scan, "regex")
-
-            # linknotfound.conf report
-            _config_report = "report"
-            _cfg.LNF_REPORT_NAME = get_config(_config_report, "name")
-            _cfg.LNF_REPORT_PATH = get_config(_config_report, "path")
-
-        for k in [a for a in dir(_cfg) if a.startswith("LNF_")]:
-            if k in os.environ:
-                logging.info(f"overriding configuration {k}")
-                setattr(_cfg, k, os.getenv(k))
-
-        return _cfg
+logging.basicConfig(
+    format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
+    datefmt="%Y-%m-%d:%H:%M:%S",
+    level=logging.INFO,
+)
 
 
 class Runner:
     cfg = None
     gh = None
     rp = None
+    metadata = {}
 
     def runner_init(self):
-        self.cfg = LnfCfg().load_configuration()
+        logging.info(f"{APP_NAME} is running ...")
+        self.cfg = LnfCfg()
         logging.info(f"CFG filtering repos: {self.cfg.LNF_REPOS_CONTAINS}")
         logging.info(f"CFG scan path: {self.cfg.LNF_SCAN_PATH}")
         logging.info(f"CFG report path: {self.cfg.LNF_REPORT_PATH}")
@@ -104,7 +39,7 @@ class Runner:
                 raise RuntimeError
         except RuntimeError:
             logging.error(
-                f"Missing github TOKEN, check GITHUB_TOKEN or LNF_GITHUB_TOKEN env var or token in {app_name}.conf"
+                f"Missing github TOKEN, check GITHUB_TOKEN or LNF_GITHUB_TOKEN env var or token in {APP_NAME}.conf"
             )
             sys.exit(1)
 
@@ -198,3 +133,40 @@ class Runner:
             rp_repo.total_broken_links, rp_repo.total_links = get_links_sum(lk)
             rp.append(rp_repo)
         self.rp.org.repos = rp
+
+
+def scanner():
+    # move to phase
+    start_time = datetime.now()
+    runner = Runner()
+    runner.runner_init()
+    repos = runner.get_org_repos()
+    filtered_repos = runner.filter_repos(repos)
+    runner.scan(filtered_repos)
+    end_time = datetime.now()
+    runner.rp.duration = end_time - start_time
+    runner.rp.to_console()
+    report_file_name = f"{runner.rp.report_date}-{runner.cfg.LNF_REPORT_NAME}.txt"
+    runner.rp.to_file(
+        report_path=runner.cfg.LNF_REPORT_PATH, report_name=report_file_name
+    )
+    runner.metadata = {
+        "report_name": f"{report_file_name}",
+        "scan_duration": f"{runner.rp.duration}",
+        "repos": f"{runner.rp.total_repos}",
+        "repos_scanner": f"{runner.rp.total_repos_filtered}",
+    }
+    # report to S3
+    upload_file(report_file_name, runner)
+
+    print("\n\n")
+    logging.info(
+        f"scan completed report "
+        f"saved at {runner.cfg.LNF_REPORT_PATH}/{runner.cfg.LNF_REPORT_NAME}"
+    )
+    print("\n\n")
+
+
+def test_run_time():
+    logging.info(f"{APP_NAME} is fine!")
+    exit(0)

@@ -1,43 +1,37 @@
 import logging
 
 import click
-from linknotfound import app_name
-from linknotfound.phase import Runner
-import datetime
+from gevent.pywsgi import WSGIServer
+from linknotfound.web import create_app
+from linknotfound.phase import scanner, test_run_time
 
-logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
-
-
-def run():
-    start_time = datetime.datetime.now()
-    logging.info(f"{app_name} is running ...")
-    runner = Runner()
-    runner.runner_init()
-    repos = runner.get_org_repos()
-    filtered_repos = runner.filter_repos(repos)
-    runner.scan(filtered_repos)
-    end_time = datetime.datetime.now()
-    runner.rp.duration = end_time - start_time
-    runner.rp.to_console()
-    runner.rp.to_file(
-        report_path=runner.cfg.LNF_REPORT_PATH, report_name=runner.cfg.LNF_REPORT_NAME
-    )
-    print("\n\n")
-    logging.info(
-        f"scan completed! report saved at {runner.cfg.LNF_REPORT_PATH}/{runner.cfg.LNF_REPORT_NAME}"
-    )
-    print("\n\n")
+logging.basicConfig(
+    format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
+    datefmt="%Y-%m-%d:%H:%M:%S",
+    level=logging.INFO,
+)
 
 
-@click.command()
-@click.option("--test", is_flag=True, help="testing app")
-@click.option("--scan", is_flag=True, help="run scanner")
-def cli(test, scan):
-    if test:
-        logging.info(f"{app_name} is fine!")
-        exit(0)
-    if scan:
-        run()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command(help="test program execution")
+def test():
+    test_run_time()
+
+
+@cli.command(help="run scanner")
+def scan():
+    scanner()
+
+
+@cli.command(help="run web application to list and access reports")
+def web():
+    web = create_app()
+    http_server = WSGIServer(("0.0.0.0", 8000), web)
+    http_server.serve_forever()
 
 
 if __name__ == "__main__":

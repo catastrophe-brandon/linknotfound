@@ -5,7 +5,7 @@ if [ $? -eq 0 ]; then
   docker rmi linknotfound --force
 fi
 
-docker build --build-arg linknotfound_RUN="--test" -t linknotfound -f Dockerfile . --network host
+docker build --build-arg linknotfound_RUN="test" -t linknotfound -f Dockerfile . --network host
 echo
 
 echo "--- images built ---"

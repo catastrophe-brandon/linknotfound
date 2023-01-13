@@ -13,3 +13,8 @@ regex = "*******"
 [report]
 name = "linknotfound"
 path = "/var/tmp/"
+
+[aws]
+bucket = "report-linknotfound"
+aws_access_key_id = "*******"
+aws_secret_key_id = "*******"
