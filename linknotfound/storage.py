@@ -1,6 +1,4 @@
 import logging
-import boto3
-import boto3.session
 from boto3.session import Session
 
 logging.basicConfig(
@@ -20,12 +18,13 @@ class CustomSession(Session):
         return cls.instance
 
 
-def upload_file(file_name, cfg):
-    object_name = file_name
-    # TODO: update this code to use session object
-    s3_client = boto3.client("s3")
-    response = s3_client.upload_file(file_name, cfg.LNF_S3_BUCKET, object_name)
-    return response
+def upload_file(report_file_name, runner):
+    session = CustomSession(runner.cfg)
+    s3 = session.resource("s3")
+    with open(f"{runner.cfg.LNF_REPORT_PATH}{report_file_name}", "rb") as data:
+        s3.Object(runner.cfg.LNF_S3_BUCKET, report_file_name).put(
+            Body=data, Metadata=runner.metadata
+        )
 
 
 def download_file(file_name, cfg):
@@ -41,13 +40,14 @@ def get_file(file_name, cfg):
     s3 = session.resource("s3")
     file_content = s3.Bucket(cfg.LNF_S3_BUCKET).Object(file_name).get()
     data = file_content["Body"].read().decode("utf-8")
-    return data
+    metadata = file_content["Metadata"]
+    obj_file = {"data": data, "metadata": metadata}
+    return obj_file
 
 
 def list_files(cfg):
     session = CustomSession(cfg)
     s3 = session.resource("s3")
-
     bucket_obj = s3.Bucket(cfg.LNF_S3_BUCKET)
     contents = []
     for report in bucket_obj.objects.all():

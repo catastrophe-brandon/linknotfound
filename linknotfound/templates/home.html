@@ -1,15 +1,20 @@
 {% extends 'base.html' %}
 
-{% block header %}
-<h1>{% block title %}Reports{% endblock %}</h1>
-{% endblock %}
-
 {% block content %}
-<ul>
-    {% for item in contents %}
-    <li>
-        <a href="/get/{{ item.key }}">{{ item.key }}</a>
-    </li>
-    {% endfor %}
-</ul>
+<div class="container py-3 my-3">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Report</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in contents %}
+        <tr>
+            <td><a href="/get/{{ item.key }}">{{ item.key }}</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

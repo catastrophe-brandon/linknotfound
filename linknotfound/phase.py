@@ -7,8 +7,10 @@ from shutil import rmtree
 from os import environ, path, mkdir, walk
 from github import Github
 from git import Repo
+from datetime import datetime
 from linknotfound.util import get_links_sum, LnfCfg, APP_NAME
 from linknotfound.report import Report, RPRepo, RPDocLink
+from linknotfound.storage import upload_file
 
 logging.basicConfig(
     format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
@@ -21,8 +23,10 @@ class Runner:
     cfg = None
     gh = None
     rp = None
+    metadata = {}
 
     def runner_init(self):
+        logging.info(f"{APP_NAME} is running ...")
         self.cfg = LnfCfg()
         logging.info(f"CFG filtering repos: {self.cfg.LNF_REPOS_CONTAINS}")
         logging.info(f"CFG scan path: {self.cfg.LNF_SCAN_PATH}")
@@ -129,3 +133,40 @@ class Runner:
             rp_repo.total_broken_links, rp_repo.total_links = get_links_sum(lk)
             rp.append(rp_repo)
         self.rp.org.repos = rp
+
+
+def scanner():
+    # move to phase
+    start_time = datetime.now()
+    runner = Runner()
+    runner.runner_init()
+    repos = runner.get_org_repos()
+    filtered_repos = runner.filter_repos(repos)
+    runner.scan(filtered_repos)
+    end_time = datetime.now()
+    runner.rp.duration = end_time - start_time
+    runner.rp.to_console()
+    report_file_name = f"{runner.rp.report_date}-{runner.cfg.LNF_REPORT_NAME}.txt"
+    runner.rp.to_file(
+        report_path=runner.cfg.LNF_REPORT_PATH, report_name=report_file_name
+    )
+    runner.metadata = {
+        "report_name": f"{report_file_name}",
+        "scan_duration": f"{runner.rp.duration}",
+        "repos": f"{runner.rp.total_repos}",
+        "repos_scanner": f"{runner.rp.total_repos_filtered}",
+    }
+    # report to S3
+    upload_file(report_file_name, runner)
+
+    print("\n\n")
+    logging.info(
+        f"scan completed report "
+        f"saved at {runner.cfg.LNF_REPORT_PATH}/{runner.cfg.LNF_REPORT_NAME}"
+    )
+    print("\n\n")
+
+
+def test_run_time():
+    logging.info(f"{APP_NAME} is fine!")
+    exit(0)

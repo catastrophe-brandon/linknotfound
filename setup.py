@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="linknotfound",
-    version="0.0.3",
+    version="0.0.4",
     author="Eduardo Cerqueira",
     author_email="eduardomcerqueira@gmail.com",
     description="cli tool to find broken links in applications source code",
@@ -21,11 +21,13 @@ setuptools.setup(
     ],
     packages=setuptools.find_packages(include=["linknotfound", "linknotfound.*"]),
     install_requires=[
-        "requests==2.28.1",
+        "boto3==1.26.48",
+        "click==8.1.3",
+        "Flask==2.2.2",
+        "gevent==22.10.2",
         "GitPython==3.1.27",
         "PyGithub==1.55",
-        "click==8.1.3",
-        # TODO: add packages
+        "requests==2.28.1",
     ],
     py_modules=["linknotfound"],
     entry_points={

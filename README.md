@@ -9,16 +9,25 @@
 This project is a POC, [proof of concept](https://en.wikipedia.org/wiki/Proof_of_concept) for a simple tool to find and
 report broken links from an application source code.
 
+It is a **client** and **server** applications, where the client also referred as scanner collect and analyze the
+repos and send the report to S3 bucket. The server is retrieves the reports from S3 bucket and present to the user.
+
 _This repository doesn't intend to be a final version of this poc, as well should not run in a production
 environment, as a public and open-source code you can use it with your own risks and contributions are welcome!._
 
 ## diagrams
 
-![diagram](docs/img/diagram.png)<br>
-_high-level overview with configuration, execution and reporting_
+![diagram_scanner](docs/img/diagram_scanner.png)<br>
+_high-level overview for the scanner client application_
+
+![diagram_web](docs/img/diagram_web.png)<br>
+_web application_
 
 ![diagram](docs/img/linknotfound-GH-workflow-automation.png)<br>
 _automation using GitHub workflow, triggered by new PR event_
+
+![diagram_scanner](docs/img/diagram.png)<br>
+_not implemented, future idea integrating with GH PR and workflow_
 
 # Contributing and running the application
 
@@ -72,11 +81,18 @@ If running the program from your local development environment, use the path ./l
 before running the commands below. If running in container, you must be in the path ./linknotfound
 
 ```shell
+# see help
+linknotfound
+
 # checking installation
-linknotfound --test
+linknotfound test
 
 # running the scanner
-linknotfound --scan
+linknotfound scan
+
+# running the web
+linknotfound web
+
 ```
 
 ### running in container
@@ -91,8 +107,9 @@ sh ops/scripts/docker_run.sh
 You can pass arguments when running the script:
 
 ```shell
-sh ops/scripts/docker_run.sh --test
-sh ops/scripts/docker_run.sh --scan
+sh ops/scripts/docker_run.sh test
+sh ops/scripts/docker_run.sh scan
+sh ops/scripts/docker_run.sh web
 ```
 
 For running the scan you can pass all configuration by environment variables:
@@ -103,7 +120,16 @@ docker run \
 -e LNF_GITHUB_TOKEN="******" \
 -e LNF_REPOS_CONTAINS="['-ui', '-frontend']" \
 -e LNF_SCAN_REGEX="((http|https)\\:\/\/)?(doc\\.domain\\.com\\/docs)+([a-zA-Z0-9\\.\\&\\/\\?\\:@\\-_=#])*" \
--e LINKNOTFOUND_RUN="--scan" -it linknotfound /bin/bash
+-e LINKNOTFOUND_RUN="scan" -it linknotfound /bin/bash
+```
+
+
+## Web application
+
+for development, run the application on debug mode to activate the auto-reload.
+
+```shell
+flask --app web.py --debug run
 ```
 
 ## contributing

@@ -19,11 +19,19 @@ def create_app():
         contents = list_files(cfg)
         return render_template("home.html", contents=contents)
 
+    @app.route("/how")
+    def how():
+        return render_template("how.html")
+
     @app.route("/get/<filename>", methods=["GET"])
     def get(filename):
         if request.method == "GET":
-            data = get_file(filename, cfg)
-            return render_template("report.html", data=data, title=filename)
+            obj_file = get_file(filename, cfg)
+            data = obj_file["data"]
+            metadata = obj_file["metadata"]
+            return render_template(
+                "report.html", data=data, metadata=metadata, title=filename
+            )
 
     @app.route("/download/<filename>", methods=["GET"])
     def download(filename):
