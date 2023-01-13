@@ -1,7 +1,7 @@
+boto3
 click
+flask
+gevent
 gitpython
 PyGithub
 requests
-boto3
-flask
-gevent

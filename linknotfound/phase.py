@@ -10,8 +10,11 @@ from git import Repo
 from linknotfound.util import get_links_sum, LnfCfg, APP_NAME
 from linknotfound.report import Report, RPRepo, RPDocLink
 
-logging.basicConfig(format='%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                    datefmt='%Y-%m-%d:%H:%M:%S', level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
+    datefmt="%Y-%m-%d:%H:%M:%S",
+    level=logging.INFO,
+)
 
 
 class Runner:
@@ -90,7 +93,7 @@ class Runner:
             # repo files
             l_files = []
             for curr_path, currentDirectory, files in walk(
-                    f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
+                f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
             ):
                 for file in files:
                     file_abs = path.join(curr_path, file)
