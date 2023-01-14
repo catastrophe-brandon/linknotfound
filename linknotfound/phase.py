@@ -8,9 +8,17 @@ from os import environ, path, mkdir, walk
 from github import Github
 from git import Repo
 from datetime import datetime
-from linknotfound.util import get_links_sum, LnfCfg, APP_NAME
+from linknotfound.util import (
+    get_links_sum,
+    LnfCfg,
+    APP_NAME,
+    HTTP_STATUS_RETRY_FORCE,
+    HTTP_METHOD_WHITELIST,
+)
 from linknotfound.report import Report, RPRepo, RPDocLink
 from linknotfound.storage import upload_file
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 logging.basicConfig(
     format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
@@ -122,9 +130,26 @@ class Runner:
                             rp_doc = RPDocLink()
                             rp_doc.file_name = f_name
                             rp_doc.url = str(match[0]).replace("'", "")
-                            # TODO: https://github.com/eduardocerqueira/linknotfound/issues/3
-                            # check doc url is accessible
-                            rp_doc.status = requests.get(url=rp_doc.url).status_code
+
+                            retry_strategy = Retry(
+                                total=3,
+                                status_forcelist=HTTP_STATUS_RETRY_FORCE,
+                                method_whitelist=HTTP_METHOD_WHITELIST,
+                            )
+                            adapter = HTTPAdapter(max_retries=retry_strategy)
+                            http = requests.Session()
+                            http.mount("https://", adapter)
+                            http.mount("http://", adapter)
+
+                            try:
+                                # check doc url is accessible
+                                rp_doc.status = http.get(url=rp_doc.url).status_code
+                            except Exception as ex:
+                                logging.error(
+                                    f"{ex} on checking {rp_doc.url} setting status to ERROR"
+                                )
+                                rp_doc.status = "ERROR"
+
                             lk.append(rp_doc)
                             logging.info(f"{rp_doc.status}\n\t{rp_doc.file_name}")
                 except UnicodeError:
