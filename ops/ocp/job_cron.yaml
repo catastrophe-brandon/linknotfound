@@ -32,11 +32,11 @@ spec:
               imagePullPolicy: IfNotPresent
               resources:
                 limits:
+                  cpu: 500m
+                  memory: 4Gi
+                requests:
                   cpu: 200m
                   memory: 2Gi
-                requests:
-                  cpu: 100m
-                  memory: 1Gi
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
           dnsPolicy: ClusterFirst
