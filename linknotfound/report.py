@@ -14,8 +14,9 @@ class RPDocLink:
 class RPRepo:
     """Report Repositories - 2nd level"""
 
-    def __int__(self, name, url, link, tf, tl, tbl):
+    def __int__(self, name, path, url, link, tf, tl, tbl):
         self.name = name
+        self.path = path
         self.url = url
         self.link = link
         self.total_files = tf
@@ -37,7 +38,7 @@ class RPOrg:
 class Report:
     """Report body"""
 
-    report_date = datetime.today().strftime("%Y-%m-%d-%S")
+    report_date = datetime.today().strftime("%Y-%m-%d-%H%M")
     report_header = "-=-=-=" * 25
     duration = None
     org = RPOrg()

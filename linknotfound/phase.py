@@ -87,18 +87,17 @@ class Runner:
             rp_repo = RPRepo()
             rp_repo.name = repo.name
             rp_repo.url = repo.html_url
+            rp_repo.path = f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
 
             logging.info(f"cloning {repo.full_name}")
             Repo.clone_from(
                 url=f"https://{self.cfg.LNF_GITHUB_TOKEN}@github.com/{repo.full_name}.git",
-                to_path=f"{self.cfg.LNF_SCAN_PATH}/{repo.name}",
+                to_path=f"{rp_repo.path}",
             )
 
             # repo files
             l_files = []
-            for curr_path, currentDirectory, files in walk(
-                f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
-            ):
+            for curr_path, currentDirectory, files in walk(f"{rp_repo.path}"):
                 for file in files:
                     file_abs = path.join(curr_path, file)
                     if any(st in f"{file_abs}" for st in self.cfg.LNF_SCAN_EXCLUDE):
@@ -123,6 +122,7 @@ class Runner:
                             rp_doc = RPDocLink()
                             rp_doc.file_name = f_name
                             rp_doc.url = str(match[0]).replace("'", "")
+                            # TODO: https://github.com/eduardocerqueira/linknotfound/issues/3
                             # check doc url is accessible
                             rp_doc.status = requests.get(url=rp_doc.url).status_code
                             lk.append(rp_doc)
@@ -132,6 +132,8 @@ class Runner:
             rp_repo.link = lk
             rp_repo.total_broken_links, rp_repo.total_links = get_links_sum(lk)
             rp.append(rp_repo)
+            # preserve disk space, deleting repo cloned for this scan
+            rmtree(rp_repo.path)
         self.rp.org.repos = rp
 
 
