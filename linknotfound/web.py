@@ -16,8 +16,12 @@ def create_app():
 
     @app.route("/")
     def home():
-        contents = list_files(cfg)
-        return render_template("home.html", contents=contents)
+        files_in_bucket = list_files(cfg)
+        contents = []
+        for item in files_in_bucket:
+            contents.append(item.key)
+        content_sorted = sorted(contents, reverse=True)
+        return render_template("home.html", contents=content_sorted)
 
     @app.route("/how")
     def how():
