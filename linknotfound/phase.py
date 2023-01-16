@@ -97,7 +97,7 @@ class Runner:
             rp_repo.url = repo.html_url
             rp_repo.path = f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
 
-            logging.info(f"cloning {repo.full_name}")
+            logging.info(f"cloning {repo.full_name} at {rp_repo.path}")
             Repo.clone_from(
                 url=f"https://{self.cfg.LNF_GITHUB_TOKEN}@github.com/{repo.full_name}.git",
                 to_path=f"{rp_repo.path}",
@@ -158,6 +158,7 @@ class Runner:
             rp_repo.total_broken_links, rp_repo.total_links = get_links_sum(lk)
             rp.append(rp_repo)
             # preserve disk space, deleting repo cloned for this scan
+            logging.info(f"deleting folder {rp_repo.path}")
             rmtree(rp_repo.path)
         self.rp.org.repos = rp
 
