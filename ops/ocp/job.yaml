@@ -18,7 +18,7 @@ spec:
           env:
             - name: LINKNOTFOUND_RUN
               value: scan
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           resources:
             limits:
               cpu: 500m

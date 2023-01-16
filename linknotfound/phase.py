@@ -93,11 +93,12 @@ class Runner:
         rp = []
         counter = 0
         for repo in repos:
+            counter += 1
             rp_repo = RPRepo()
             rp_repo.name = repo.name
             rp_repo.url = repo.html_url
             rp_repo.path = f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
-            logging.info(f"scanning {counter + 1} out of {len(repos)} repos")
+            logging.info(f"scanning {counter} out of {len(repos)} repos")
             logging.info(f"cloning {repo.full_name} at {rp_repo.path}")
             Repo.clone_from(
                 url=f"https://{self.cfg.LNF_GITHUB_TOKEN}@github.com/{repo.full_name}.git",
