@@ -6,7 +6,7 @@ metadata:
   labels:
     mode: pull
 spec:
-  schedule: '10 * * * *'
+  schedule: '0 22 * * *'
   concurrencyPolicy: Replace
   suspend: false
   jobTemplate:
@@ -22,7 +22,7 @@ spec:
         spec:
           containers:
             - name: linknotfound-scanner
-              image: image-registry.openshift-image-registry.svc:5000/insights-qe-dev/linknotfound
+              image: image-registry.openshift-image-registry.svc:5000/insights-qe-dev/linknotfound:latest
               envFrom:
                 - secretRef:
                     name: linknotfound-secrets
