@@ -117,6 +117,8 @@ class LnfCfg:
             if k in environ:
                 logging.info(f"overriding configuration {k}")
                 setattr(self.instance, k, getenv(k))
+                if "AWS" not in k:
+                    logging.info(f"{k}={getenv(k)}")
 
         return self.instance
 
