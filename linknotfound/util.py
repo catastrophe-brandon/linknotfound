@@ -66,59 +66,71 @@ class LnfCfg:
     LNF_AWS_SECRET_ACCESS_KEY = None
 
     def load_configuration(self):
-        if path.exists(f"{APP_NAME}.conf"):
-            logging.info(f"loading configuration from file {APP_NAME}.conf")
+        _config_path = getenv("CONFIG", "linknotfound.conf")
+        if path.exists(f"{_config_path}"):
+            logging.info(f"loading configuration from file {_config_path}")
 
             # linknotfound.conf GitHub
             _config_github = "github"
             self.LNF_GITHUB_ORGANIZATION = get_config(
-                _config_github, "organization", self.LNF_GITHUB_ORGANIZATION
+                _config_path,
+                _config_github,
+                "organization",
+                self.LNF_GITHUB_ORGANIZATION,
             )
             self.LNF_GITHUB_TOKEN = get_config(
-                _config_github, "token", self.LNF_GITHUB_TOKEN
+                _config_path, _config_github, "token", self.LNF_GITHUB_TOKEN
             ) or getenv("GITHUB_TOKEN")
 
             # linknotfound.conf repos
             _config_repos = "repos"
             self.LNF_REPOS_CONTAINS = get_config(
-                _config_repos, "contains", self.LNF_REPOS_CONTAINS
+                _config_path, _config_repos, "contains", self.LNF_REPOS_CONTAINS
             )
 
             # linknotfound.conf scan
             _config_scan = "scan"
-            self.LNF_SCAN_PATH = get_config(_config_scan, "path", self.LNF_SCAN_PATH)
-            self.LNF_SCAN_EXCLUDE = get_config(
-                _config_scan, "exclude", self.LNF_SCAN_EXCLUDE
+            self.LNF_SCAN_PATH = get_config(
+                _config_path, _config_scan, "path", self.LNF_SCAN_PATH
             )
-            self.LNF_SCAN_REGEX = get_config(_config_scan, "regex", self.LNF_SCAN_REGEX)
+            self.LNF_SCAN_EXCLUDE = get_config(
+                _config_path, _config_scan, "exclude", self.LNF_SCAN_EXCLUDE
+            )
+            self.LNF_SCAN_REGEX = get_config(
+                _config_path, _config_scan, "regex", self.LNF_SCAN_REGEX
+            )
 
             # linknotfound.conf report
             _config_report = "report"
             self.LNF_REPORT_NAME = get_config(
-                _config_report, "name", self.LNF_REPORT_NAME
+                _config_path, _config_report, "name", self.LNF_REPORT_NAME
             )
             self.LNF_REPORT_PATH = get_config(
-                _config_report, "path", self.LNF_REPORT_PATH
+                _config_path, _config_report, "path", self.LNF_REPORT_PATH
             )
 
             # linknotfound.conf aws
             _config_report = "aws"
             self.LNF_S3_BUCKET = get_config(
-                _config_report, "bucket", self.LNF_S3_BUCKET
+                _config_path, _config_report, "bucket", self.LNF_S3_BUCKET
             )
             self.LNF_AWS_ACCESS_KEY_ID = get_config(
-                _config_report, "aws_access_key_id", self.LNF_AWS_ACCESS_KEY_ID
+                _config_path,
+                _config_report,
+                "aws_access_key_id",
+                self.LNF_AWS_ACCESS_KEY_ID,
             )
             self.LNF_AWS_SECRET_ACCESS_KEY = get_config(
-                _config_report, "aws_secret_key_id", self.LNF_AWS_SECRET_ACCESS_KEY
+                _config_path,
+                _config_report,
+                "aws_secret_key_id",
+                self.LNF_AWS_SECRET_ACCESS_KEY,
             )
 
         for k in [a for a in dir(self.instance) if a.startswith("LNF_")]:
             if k in environ:
                 logging.info(f"overriding configuration {k}")
                 setattr(self.instance, k, getenv(k))
-                if "AWS" not in k:
-                    logging.info(f"{k}={getenv(k)}")
 
         return self.instance
 
@@ -128,9 +140,9 @@ class LnfCfg:
         return cfg
 
 
-def get_config(section, parameter, default):
+def get_config(config_path, section, parameter, default):
     config = SafeConfigParser()
-    config.read(f"{APP_NAME}.conf")
+    config.read(config_path)
 
     if section not in config:
         return default
