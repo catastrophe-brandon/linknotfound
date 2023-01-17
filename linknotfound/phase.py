@@ -19,6 +19,7 @@ from linknotfound.report import Report, RPRepo, RPDocLink
 from linknotfound.storage import upload_file
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+from retry import retry
 
 logging.basicConfig(
     format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
@@ -83,6 +84,14 @@ class Runner:
         self.rp.total_repos_filtered = l_filtered.__len__()
         return l_filtered
 
+    @retry(tries=3, delay=10, logger=logging)
+    def clone_repo(self, full_name, local_path):
+        logging.info(f"cloning {full_name} at {local_path}")
+        Repo.clone_from(
+            url=f"https://{self.cfg.LNF_GITHUB_TOKEN}@github.com/{full_name}.git",
+            to_path=f"{local_path}",
+        )
+
     def scan(self, repos):
         """
         scan files
@@ -99,12 +108,7 @@ class Runner:
             rp_repo.url = repo.html_url
             rp_repo.path = f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
             logging.info(f"scanning {counter} out of {len(repos)} repos")
-            logging.info(f"cloning {repo.full_name} at {rp_repo.path}")
-            Repo.clone_from(
-                url=f"https://{self.cfg.LNF_GITHUB_TOKEN}@github.com/{repo.full_name}.git",
-                to_path=f"{rp_repo.path}",
-            )
-
+            self.clone_repo(full_name=repo.full_name, local_path=rp_repo.path)
             # repo files
             l_files = []
             for curr_path, currentDirectory, files in walk(f"{rp_repo.path}"):
@@ -153,7 +157,10 @@ class Runner:
                                 rp_doc.status = "ERROR"
 
                             lk.append(rp_doc)
-                            logging.info(f"{rp_doc.status}\n\t{rp_doc.file_name}")
+                            logging.info(f"FILE={rp_doc.file_name}")
+                            logging.info(
+                                f"HTTP_STATUS_CODE={rp_doc.status} {rp_doc.url}"
+                            )
                 except UnicodeError:
                     pass
             rp_repo.link = lk
