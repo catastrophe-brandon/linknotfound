@@ -18,6 +18,8 @@ spec:
           env:
             - name: LINKNOTFOUND_RUN
               value: scan
+            - name: CONFIG
+              value: /var/tmp/config/linknotfound.conf
           imagePullPolicy: Always
           resources:
             limits:
@@ -26,8 +28,16 @@ spec:
             requests:
               cpu: 1000m
               memory: "1.5Gi"
+          volumeMounts:
+            - name: linknotfound-conf
+              mountPath: /var/tmp/config
+              readOnly: false
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+      volumes:
+        - name: linknotfound-conf
+          secret:
+            secretName: linknotfound-conf
       dnsPolicy: ClusterFirst
       restartPolicy: Never
       schedulerName: default-scheduler
