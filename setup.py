@@ -28,6 +28,7 @@ setuptools.setup(
         "GitPython==3.1.27",
         "PyGithub==1.55",
         "requests==2.28.1",
+        "retry==0.9.2",
     ],
     py_modules=["linknotfound"],
     entry_points={
