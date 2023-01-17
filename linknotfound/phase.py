@@ -2,7 +2,6 @@ import logging
 
 import re
 import sys
-import time
 
 import requests
 from shutil import rmtree
@@ -15,7 +14,7 @@ from linknotfound.util import (
     LnfCfg,
     APP_NAME,
     HTTP_STATUS_RETRY_FORCE,
-    HTTP_METHOD_WHITELIST
+    HTTP_METHOD_WHITELIST,
 )
 from linknotfound.report import Report, RPRepo, RPDocLink
 from linknotfound.storage import upload_file
@@ -84,7 +83,9 @@ class Runner:
             if any(st in f"{repo.name}" for st in self.cfg.LNF_REPOS_CONTAINS):
                 l_filtered.append(repo)
         self.rp.total_repos_filtered = l_filtered.__len__()
-        logging.info(f"set scanner for {self.rp.total_repos_filtered} out of {repos.totalCount} repos")
+        logging.info(
+            f"set scanner for {self.rp.total_repos_filtered} out of {repos.totalCount} repos"
+        )
         return l_filtered
 
     @retry(tries=3, delay=30, logger=logging)
@@ -114,10 +115,6 @@ class Runner:
             rp_repo.name = repo.name
             rp_repo.url = repo.html_url
             rp_repo.path = f"{self.cfg.LNF_SCAN_PATH}/{repo.name}"
-            # hold processing to wait CPU and MEMORY get normal avoiding OOMKilled
-            if counter == len(repos) / 2:
-                logging.info("taking a breath for 30s")
-                time.sleep(30)
             logging.info(f"scanning {counter} out of {len(repos)} repos")
             self.clone_repo(full_name=repo.full_name, local_path=rp_repo.path)
             # repo files
