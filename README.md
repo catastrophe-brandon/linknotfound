@@ -89,6 +89,16 @@ linknotfound web
 
 ```
 
+### regex configuration
+
+The following regex configuration can be used to identify a broader sample of broken links, borrowed from
+[this StackOverflow post](https://stackoverflow.com/a/6041965):
+
+```
+# Note: Escaped the % character using %%
+regex = "(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%%&:\/~+#-]*[\w@?^=%%&\/~+#-])"
+```
+
 ### running in container
 
 Run the commands below to build and run linknotfound in container.
