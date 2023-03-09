@@ -1,8 +1,9 @@
 from datetime import datetime
 from linknotfound.util import HTTP_STATUS_BROKEN_LINK
+import json
 
 
-class RPDocLink:
+class RPDocLink(object):
     """Report Doc links - 3rd level"""
 
     def __int__(self, file_name, url, status):
@@ -11,7 +12,7 @@ class RPDocLink:
         self.status = status
 
 
-class RPRepo:
+class RPRepo(object):
     """Report Repositories - 2nd level"""
 
     def __int__(self, name, path, url, link, tf, tl, tbl):
@@ -24,7 +25,7 @@ class RPRepo:
         self.total_broken_links = tbl
 
 
-class RPOrg:
+class RPOrg(object):
     """Report Organization - 1st level"""
 
     def __int__(self, name, url, repos, tr, trf):
@@ -35,7 +36,7 @@ class RPOrg:
         self.total_repos_filtered = trf
 
 
-class Report:
+class Report(object):
     """Report body"""
 
     report_date = datetime.today().strftime("%Y-%m-%d-%H%M")
@@ -85,3 +86,24 @@ class Report:
                         report_file.write(f"\n\t{count}. FILE: {lk.file_name}")
                         report_file.write(f"\n\tURL: {lk.url}")
                         count += 1
+
+    def build_json(self) -> list:
+        results = []
+        for repo in self.org.repos:
+            broken_links = [
+                {"file": lk.file_name, "url": lk.url, "status_code": lk.status}
+                for lk in repo.link
+                if lk.status in HTTP_STATUS_BROKEN_LINK
+            ]
+            results.append(
+                {
+                    "repo_name": repo.name,
+                    "repo_url": repo.url,
+                    "broken_links": broken_links,
+                }
+            )
+            return results
+
+    def to_json(self, report_path, report_name):
+        with open(f"{report_path}{report_name}", "w") as file:
+            json.dump(self.build_json(), file, indent=4)

@@ -9,6 +9,8 @@ from os import environ, path, mkdir, walk
 from github import Github
 from git import Repo
 from datetime import datetime
+
+from linknotfound.api_upload import upload_json_file
 from linknotfound.util import (
     get_links_sum,
     LnfCfg,
@@ -158,6 +160,9 @@ class Runner:
                             try:
                                 # check doc url is accessible
                                 rp_doc.status = http.get(url=rp_doc.url).status_code
+                                logging.info(
+                                    f"checked {rp_doc.url} and got status code {rp_doc.status}"
+                                )
                             except Exception as ex:
                                 logging.error(
                                     f"{ex} on checking {rp_doc.url} setting status to ERROR"
@@ -195,14 +200,22 @@ def scanner():
     runner.rp.to_file(
         report_path=runner.cfg.LNF_REPORT_PATH, report_name=report_file_name
     )
+    json_file_name = f"{runner.rp.report_date}.json"
+    runner.rp.to_json(
+        report_path=runner.cfg.LNF_REPORT_PATH, report_name=json_file_name
+    )
     runner.metadata = {
         "report_name": f"{report_file_name}",
         "scan_duration": f"{runner.rp.duration}",
         "repos": f"{runner.rp.total_repos}",
         "repos_scanner": f"{runner.rp.total_repos_filtered}",
     }
+
+    # Commented-out to expedite testing/dev
     # report to S3
-    upload_file(report_file_name, runner)
+    # upload_file(report_file_name, runner)
+
+    upload_json_file(json_file_name)
 
     print("\n\n")
     logging.info(

@@ -147,7 +147,11 @@ def get_config(config_path, section, parameter, default):
     if section not in config:
         return default
 
-    return json.loads(config.get(section, parameter))
+    # Updated because json.loads chokes on regex (and I'm not sure why it was done this way to begin with)
+    if parameter == "regex":
+        return config.get(section, parameter).strip('"')
+    else:
+        return json.loads(config.get(section, parameter))
 
 
 def prepend_line(file_name, line):
