@@ -65,6 +65,9 @@ class LnfCfg:
     LNF_AWS_ACCESS_KEY_ID = None
     LNF_AWS_SECRET_ACCESS_KEY = None
 
+    # Endpoint to post JSON report data to
+    LNF_POST_URL = "http://not-a-real-url.nope"
+
     def load_configuration(self):
         _config_path = getenv("CONFIG", "linknotfound.conf")
         if path.exists(f"{_config_path}"):
@@ -125,6 +128,10 @@ class LnfCfg:
                 _config_report,
                 "aws_secret_key_id",
                 self.LNF_AWS_SECRET_ACCESS_KEY,
+            )
+
+            self.LNF_POST_URL = get_config(
+                _config_path, "api", "upload_url", self.LNF_POST_URL
             )
 
         for k in [a for a in dir(self.instance) if a.startswith("LNF_")]:

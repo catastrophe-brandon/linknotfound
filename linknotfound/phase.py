@@ -216,8 +216,9 @@ def scanner():
     # Commented-out to expedite testing/dev
     # report to S3
     # upload_file(report_file_name, runner)
-
-    upload_json_file(json_file_name)
+    upload_json_file(
+        f"{runner.cfg.LNF_REPORT_PATH}/{json_file_name}", runner.cfg.LNF_POST_URL
+    )
 
     print("\n\n")
     logging.info(
