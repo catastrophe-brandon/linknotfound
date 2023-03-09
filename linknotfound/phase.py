@@ -202,7 +202,9 @@ def scanner():
     )
     json_file_name = f"{runner.rp.report_date}.json"
     runner.rp.to_json(
-        report_path=runner.cfg.LNF_REPORT_PATH, report_name=json_file_name
+        report_path=runner.cfg.LNF_REPORT_PATH,
+        report_name=json_file_name,
+        scan_path=runner.cfg.LNF_SCAN_PATH,
     )
     runner.metadata = {
         "report_name": f"{report_file_name}",

@@ -36,6 +36,21 @@ class RPOrg(object):
         self.total_repos_filtered = trf
 
 
+def tweak_file_name(file_name: str, repo_name: str, local_path_prefix: str) -> str:
+    """
+    File names produced by the scanner include some artifacts of the scanning process, namely:
+    1. Local file system path
+    2. repository name
+    The purpose of this function is to clean the file name in post-processing to avoid changing the scanning logic.
+    """
+    return (
+        file_name.replace(local_path_prefix, "")
+        .lstrip("/")
+        .replace(repo_name, "")
+        .lstrip("/")
+    )
+
+
 class Report(object):
     """Report body"""
 
@@ -87,11 +102,21 @@ class Report(object):
                         report_file.write(f"\n\tURL: {lk.url}")
                         count += 1
 
-    def build_json(self) -> list:
+    def build_json(self, path_prefix_to_remove: str) -> list:
+        """
+        @param path_prefix_to_remove a string that can be removed from every file_name; needed
+        because the scanner stores the absolute local file path in the data.
+        """
         results = []
         for repo in self.org.repos:
             broken_links = [
-                {"file": lk.file_name, "url": lk.url, "status_code": lk.status}
+                {
+                    "file": tweak_file_name(
+                        lk.file_name, repo.name, path_prefix_to_remove
+                    ),
+                    "url": lk.url,
+                    "status_code": lk.status,
+                }
                 for lk in repo.link
                 if lk.status in HTTP_STATUS_BROKEN_LINK
             ]
@@ -100,10 +125,11 @@ class Report(object):
                     "repo_name": repo.name,
                     "repo_url": repo.url,
                     "broken_links": broken_links,
+                    "report_date": self.report_date,
                 }
             )
             return results
 
-    def to_json(self, report_path, report_name):
+    def to_json(self, report_path, report_name, scan_path):
         with open(f"{report_path}{report_name}", "w") as file:
-            json.dump(self.build_json(), file, indent=4)
+            json.dump(self.build_json(scan_path), file, indent=4)
