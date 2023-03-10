@@ -125,10 +125,10 @@ class Report(object):
                     "repo_name": repo.name,
                     "repo_url": repo.url,
                     "broken_links": broken_links,
-                    "report_date": self.report_date,
+                    "report_date": datetime.now().isoformat(),
                 }
             )
-            return results
+            return {"report": results}
 
     def to_json(self, report_path, report_name, scan_path):
         with open(f"{report_path}{report_name}", "w") as file:
