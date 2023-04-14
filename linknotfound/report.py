@@ -102,7 +102,7 @@ class Report(object):
                         report_file.write(f"\n\tURL: {lk.url}")
                         count += 1
 
-    def build_json(self, path_prefix_to_remove: str) -> list:
+    def build_json(self, path_prefix_to_remove: str):
         """
         @param path_prefix_to_remove a string that can be removed from every file_name; needed
         because the scanner stores the absolute local file path in the data.
@@ -125,11 +125,10 @@ class Report(object):
                     "repo_name": repo.name,
                     "repo_url": repo.url,
                     "broken_links": broken_links,
-                    "report_date": datetime.now().isoformat(),
                 }
             )
-            return {"report": results}
+        return {"report": results, "report_date": datetime.now().isoformat()}
 
-    def to_json(self, report_path, report_name, scan_path):
+    def to_json(self, report_path, report_name, scan_path, filtered_repos):
         with open(f"{report_path}{report_name}", "w") as file:
             json.dump(self.build_json(scan_path), file, indent=4)

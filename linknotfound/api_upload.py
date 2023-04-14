@@ -9,6 +9,10 @@ logging.basicConfig(
 )
 
 
+class UploadError(Exception):
+    pass
+
+
 def upload_json_file(abs_json_path: str, post_url: str):
     """
     Upload a JSON "report" of broken links to the API via POST.
@@ -21,4 +25,4 @@ def upload_json_file(abs_json_path: str, post_url: str):
             logging.error(
                 f"Response from POST to {post_url} was {response.status_code}"
             )
-            raise
+            raise UploadError

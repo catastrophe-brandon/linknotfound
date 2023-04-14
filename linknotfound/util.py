@@ -53,6 +53,8 @@ class LnfCfg:
     LNF_GITHUB_ORGANIZATION = None
     LNF_GITHUB_TOKEN = None
     LNF_REPOS_CONTAINS = ["-ui", "-frontend"]
+    LNF_REPOS_EXCLUDE = ["-build"]
+
     # Scanner
     LNF_SCAN_PATH = "/var/tmp/linknotfound"
     LNF_SCAN_EXCLUDE = [".git", ".travis"]
@@ -89,6 +91,10 @@ class LnfCfg:
             _config_repos = "repos"
             self.LNF_REPOS_CONTAINS = get_config(
                 _config_path, _config_repos, "contains", self.LNF_REPOS_CONTAINS
+            )
+
+            self.LNF_REPOS_EXCLUDE = get_config(
+                _config_path, _config_repos, "exclude", self.LNF_REPOS_EXCLUDE
             )
 
             # linknotfound.conf scan
