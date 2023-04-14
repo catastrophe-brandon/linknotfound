@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import List
+
 from linknotfound.util import HTTP_STATUS_BROKEN_LINK
 import json
 
@@ -49,6 +51,19 @@ def tweak_file_name(file_name: str, repo_name: str, local_path_prefix: str) -> s
         .replace(repo_name, "")
         .lstrip("/")
     )
+
+
+def dedupe(input_list: List):
+    """
+    There's probably a better way to do this but migraine meds prevent me from elucidation.
+    """
+    result = []
+    files = []
+    for item in input_list:
+        if item["file"] not in files:
+            result.append(item)
+            files.append(item["file"])
+    return result
 
 
 class Report(object):
@@ -124,7 +139,7 @@ class Report(object):
                 {
                     "repo_name": repo.name,
                     "repo_url": repo.url,
-                    "broken_links": broken_links,
+                    "broken_links": dedupe(broken_links),
                 }
             )
         return {"report": results, "report_date": datetime.now().isoformat()}
