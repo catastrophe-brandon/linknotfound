@@ -53,6 +53,8 @@ class LnfCfg:
     LNF_GITHUB_ORGANIZATION = None
     LNF_GITHUB_TOKEN = None
     LNF_REPOS_CONTAINS = ["-ui", "-frontend"]
+    LNF_REPOS_EXCLUDE = ["-build"]
+
     # Scanner
     LNF_SCAN_PATH = "/var/tmp/linknotfound"
     LNF_SCAN_EXCLUDE = [".git", ".travis"]
@@ -64,6 +66,9 @@ class LnfCfg:
     LNF_S3_BUCKET = "report-linknotfound"
     LNF_AWS_ACCESS_KEY_ID = None
     LNF_AWS_SECRET_ACCESS_KEY = None
+
+    # Endpoint to post JSON report data to
+    LNF_POST_URL = "http://not-a-real-url.nope"
 
     def load_configuration(self):
         _config_path = getenv("CONFIG", "linknotfound.conf")
@@ -86,6 +91,10 @@ class LnfCfg:
             _config_repos = "repos"
             self.LNF_REPOS_CONTAINS = get_config(
                 _config_path, _config_repos, "contains", self.LNF_REPOS_CONTAINS
+            )
+
+            self.LNF_REPOS_EXCLUDE = get_config(
+                _config_path, _config_repos, "exclude", self.LNF_REPOS_EXCLUDE
             )
 
             # linknotfound.conf scan
@@ -127,6 +136,10 @@ class LnfCfg:
                 self.LNF_AWS_SECRET_ACCESS_KEY,
             )
 
+            self.LNF_POST_URL = get_config(
+                _config_path, "api", "upload_url", self.LNF_POST_URL
+            )
+
         for k in [a for a in dir(self.instance) if a.startswith("LNF_")]:
             if k in environ:
                 logging.info(f"overriding configuration {k}")
@@ -147,7 +160,11 @@ def get_config(config_path, section, parameter, default):
     if section not in config:
         return default
 
-    return json.loads(config.get(section, parameter))
+    # Updated because json.loads chokes on regex (and I'm not sure why it was done this way to begin with)
+    if parameter == "regex":
+        return config.get(section, parameter).strip('"')
+    else:
+        return json.loads(config.get(section, parameter))
 
 
 def prepend_line(file_name, line):

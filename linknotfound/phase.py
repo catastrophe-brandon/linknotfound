@@ -9,6 +9,8 @@ from os import environ, path, mkdir, walk
 from github import Github
 from git import Repo
 from datetime import datetime
+
+from linknotfound.api_upload import upload_json_file, UploadError
 from linknotfound.util import (
     get_links_sum,
     LnfCfg,
@@ -18,9 +20,9 @@ from linknotfound.util import (
 )
 from linknotfound.report import Report, RPRepo, RPDocLink
 from linknotfound.storage import upload_file
-from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from retry import retry
+from requests.adapters import HTTPAdapter
 
 logging.basicConfig(
     format="%(asctime)s,%(msecs)03d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
@@ -78,15 +80,25 @@ class Runner:
         :param repos: list of repositories object
         :return: list of filtered repositories object
         """
-        l_filtered = []
+        included = []
         for repo in repos:
-            if any(st in f"{repo.name}" for st in self.cfg.LNF_REPOS_CONTAINS):
-                l_filtered.append(repo)
-        self.rp.total_repos_filtered = l_filtered.__len__()
+            for st in self.cfg.LNF_REPOS_CONTAINS:
+                if st in repo.name:
+                    included.append(repo)
+        fully_filtered = included.copy()
+        for included_repo in included:
+            for st in self.cfg.LNF_REPOS_EXCLUDE:
+                if st in included_repo.name:
+                    try:
+                        fully_filtered.remove(included_repo)
+                    except ValueError:
+                        pass
+
+        self.rp.total_repos_filtered = len(fully_filtered)
         logging.info(
             f"set scanner for {self.rp.total_repos_filtered} out of {repos.totalCount} repos"
         )
-        return l_filtered
+        return fully_filtered
 
     @retry(tries=3, delay=30, logger=logging)
     def clone_repo(self, full_name, local_path):
@@ -124,7 +136,9 @@ class Runner:
                     file_abs = path.join(curr_path, file)
                     if any(st in f"{file_abs}" for st in self.cfg.LNF_SCAN_EXCLUDE):
                         break
-                    l_files.append(file_abs)
+                    # Exclude test source from checks
+                    if "/test/" not in file_abs and "/tests/" not in file_abs:
+                        l_files.append(file_abs)
 
             rp_repo.total_files = l_files.__len__()
             logging.info(f"total files: {l_files.__len__()}")
@@ -146,7 +160,7 @@ class Runner:
                             rp_doc.url = str(match[0]).replace("'", "")
 
                             retry_strategy = Retry(
-                                total=3,
+                                total=0,
                                 status_forcelist=HTTP_STATUS_RETRY_FORCE,
                                 method_whitelist=HTTP_METHOD_WHITELIST,
                             )
@@ -157,7 +171,12 @@ class Runner:
 
                             try:
                                 # check doc url is accessible
-                                rp_doc.status = http.get(url=rp_doc.url).status_code
+                                rp_doc.status = http.get(
+                                    url=rp_doc.url, timeout=5
+                                ).status_code
+                                logging.info(
+                                    f"checked {rp_doc.url} and got status code {rp_doc.status}"
+                                )
                             except Exception as ex:
                                 logging.error(
                                     f"{ex} on checking {rp_doc.url} setting status to ERROR"
@@ -195,14 +214,30 @@ def scanner():
     runner.rp.to_file(
         report_path=runner.cfg.LNF_REPORT_PATH, report_name=report_file_name
     )
+    json_file_name = f"{runner.rp.report_date}.json"
+    runner.rp.to_json(
+        report_path=runner.cfg.LNF_REPORT_PATH,
+        report_name=json_file_name,
+        scan_path=runner.cfg.LNF_SCAN_PATH,
+        filtered_repos=filtered_repos,
+    )
     runner.metadata = {
         "report_name": f"{report_file_name}",
         "scan_duration": f"{runner.rp.duration}",
         "repos": f"{runner.rp.total_repos}",
         "repos_scanner": f"{runner.rp.total_repos_filtered}",
     }
+
+    # Commented-out to expedite testing/dev
     # report to S3
-    upload_file(report_file_name, runner)
+    # upload_file(report_file_name, runner)
+
+    try:
+        upload_json_file(
+            f"{runner.cfg.LNF_REPORT_PATH}/{json_file_name}", runner.cfg.LNF_POST_URL
+        )
+    except UploadError:
+        logging.error("Failed to upload report")
 
     print("\n\n")
     logging.info(
